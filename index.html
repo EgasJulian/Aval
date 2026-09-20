@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AVAL</title>
+<meta name="description" content="Prototipo navegable de AVAL, red de empresas verificadas de Colombia.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AVAL">
+<meta name="theme-color" content="#f3f2f2">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap">
+<style>
+/* ============ Tokens — "tinta" (default) ============ */
+:root{
+  --ink:#201e1d;
+  --ink2:rgba(32,30,29,.2); --ink22:rgba(32,30,29,.22); --ink25:rgba(32,30,29,.25);
+  --ink3:rgba(32,30,29,.3); --ink35:rgba(32,30,29,.35); --ink4:rgba(32,30,29,.4);
+  --ink45:rgba(32,30,29,.45); --ink5:rgba(32,30,29,.5); --ink55:rgba(32,30,29,.55);
+  --ink6:rgba(32,30,29,.6); --ink68:rgba(32,30,29,.68); --ink78:rgba(32,30,29,.78); --ink8:rgba(32,30,29,.8);
+  --color-bg:#f3f2f2; --color-surface:#eae9e9; --color-text:#201e1d;
+  --color-divider: var(--ink4);
+  --color-accent:#ec3013; --color-accent-100:#fff2ef; --color-accent-200:#ffe0d9;
+  --color-accent-600:#dd2b0f; --color-accent-700:#ae1800; --color-accent-800:#7c1405;
+  --color-neutral-100:#f8f4f4; --color-neutral-800:#444141;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+/* ============ Tokens — "azul" (alt palette, same structure) ============ */
+:root[data-tema="azul"]{
+  --ink:#e9f0ff;
+  --ink2:rgba(233,240,255,.30); --ink22:rgba(233,240,255,.32); --ink25:rgba(233,240,255,.35);
+  --ink3:rgba(233,240,255,.40); --ink35:rgba(233,240,255,.45); --ink4:rgba(233,240,255,.50);
+  --ink45:rgba(233,240,255,.55); --ink5:rgba(233,240,255,.58); --ink55:rgba(233,240,255,.63);
+  --ink6:rgba(233,240,255,.68); --ink68:rgba(233,240,255,.76); --ink78:rgba(233,240,255,.86); --ink8:rgba(233,240,255,.88);
+  --color-bg:#0a1733; --color-surface:#15264f; --color-text:#e9f0ff;
+  --color-divider: rgba(233,240,255,.42);
+  --color-accent:#4d8dff; --color-accent-100:#18306b; --color-accent-200:#1f3c80;
+  --color-accent-600:#6ea4ff; --color-accent-700:#a9c8ff; --color-accent-800:#d6e4ff;
+  --color-neutral-100:#16254d; --color-neutral-800:#d3e0f7;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--color-bg); color:var(--color-text);
+  font-family:Archivo,system-ui,sans-serif; -webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:none;
+}
+h1,h2,h3{margin:0;letter-spacing:-.03em}
+p{margin:0}
+a{color:var(--color-accent);text-decoration:none}
+button{font-family:inherit}
+img{max-width:100%}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--color-accent);outline-offset:2px}
+
+/* ---- design-system component classes (from Modernist styles.css) ---- */
+.hr{height:2px;border:0;margin:20px 0;background:var(--color-divider)}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;
+  font-family:Archivo,sans-serif;font-weight:800;font-size:14px;line-height:1.2;color:var(--color-text);
+  background:transparent;border:1px solid transparent;padding:10px 15px;border-radius:0;
+  -webkit-tap-highlight-color:transparent;
+}
+.btn svg{display:block;flex:none}
+.btn-primary{background:var(--color-accent);color:#fff}
+.btn-primary:active{background:var(--color-accent-700)}
+.btn-secondary{border-color:var(--color-divider)}
+.btn-secondary:active{background:color-mix(in srgb, var(--color-text) 14%, transparent)}
+.btn-ghost{color:var(--color-accent);padding-inline:2px}
+.btn-ghost:active{opacity:.6}
+.btn-block{width:100%;justify-content:flex-start;text-align:left}
+.btn[disabled]{opacity:.5;cursor:default}
+.field label{display:block;font-size:12px;margin-bottom:5px;color:var(--ink6)}
+.input{
+  width:100%;min-height:36px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);
+  caret-color:var(--color-accent);background:var(--color-surface);border:1px solid var(--color-divider);border-radius:0;
+}
+.input:focus-visible{border-color:var(--color-accent);outline-offset:0}
+.tag{display:inline-flex;align-items:center;font-size:11px;letter-spacing:.02em;padding:3px 10px}
+.tag-accent{background:var(--color-accent-100);color:var(--color-accent-800)}
+.tag-neutral{background:var(--color-neutral-100);color:var(--color-neutral-800)}
+.tag-outline{border:1px solid var(--color-accent);color:var(--color-accent)}
+.table{width:100%;border-collapse:collapse;font-size:14px}
+.table th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink6);padding:8px;border-bottom:2px solid var(--color-divider)}
+.table td{padding:8px;border-bottom:1px solid var(--color-divider)}
+
+/* ---- AVAL-specific atomics (from ColW.dc.html helmet) ---- */
+.mono{display:flex;align-items:center;justify-content:center;font-family:Archivo,sans-serif;font-weight:800;letter-spacing:.02em;flex:none}
+.kick{font:600 9px/1 Archivo,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--ink55)}
+.rulehd{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--ink4);padding-bottom:6px;margin-bottom:12px}
+.stat{border:1px solid var(--ink25);padding:9px 10px}
+.statn{font:800 19px/1 Archivo,sans-serif;letter-spacing:-.02em}
+.statl{font:600 7.5px/1.2 Archivo,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--ink55);margin-top:5px}
+.row{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--ink22)}
+.seal{display:inline-flex;align-items:center;gap:4px;background:var(--ink);color:var(--color-bg);font:600 8px/1 Archivo,sans-serif;letter-spacing:.1em;text-transform:uppercase;padding:4px 6px}
+.sb{scrollbar-width:none}
+.sb::-webkit-scrollbar{width:0;height:0}
+
+/* ---- image-slot placeholders (static, no upload runtime) ---- */
+.ph{
+  display:flex;align-items:center;justify-content:center;gap:6px;flex-direction:column;
+  background:repeating-linear-gradient(135deg, var(--ink2) 0 2px, transparent 2px 11px), var(--color-surface);
+  color:var(--ink45);font:600 8.5px/1.4 Archivo,sans-serif;letter-spacing:.08em;text-transform:uppercase;
+  text-align:center;padding:10px;width:100%;
+}
+.ph svg{opacity:.7}
+
+/* ============ app shell ============ */
+#app{height:100%;display:flex;flex-direction:column;overflow:hidden}
+.appbar{
+  flex:none;display:flex;align-items:flex-end;justify-content:space-between;gap:10px;
+  padding:calc(var(--safe-t) + 18px) 18px 9px;border-bottom:2px solid var(--ink4);
+}
+.appbar-left{display:flex;align-items:flex-end;gap:8px;min-width:0}
+.wordmark-wrap{min-width:0}
+.wordmark{font:800 25px/1 Archivo,sans-serif;letter-spacing:-.035em;white-space:nowrap}
+.wordmark .accent{color:var(--color-accent)}
+.tagline{font:600 7px/1 Archivo,sans-serif;letter-spacing:.17em;text-transform:uppercase;color:var(--ink55);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.appbar-actions{display:flex;gap:6px;flex:none}
+.iconbtn{
+  width:30px;height:30px;border:1px solid var(--ink35);display:flex;align-items:center;justify-content:center;
+  position:relative;background:transparent;color:var(--color-text);cursor:pointer;padding:0;
+  -webkit-tap-highlight-color:transparent;
+}
+.iconbtn:active{background:var(--ink2)}
+.iconbtn .dot{position:absolute;top:-4px;right:-4px;width:9px;height:9px;background:var(--color-accent)}
+#backBtn{margin-right:2px}
+
+#screens{flex:1;min-height:0;position:relative}
+.screen{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+.tabbar{
+  flex:none;border-top:2px solid var(--ink4);display:grid;grid-template-columns:repeat(5,1fr);
+  background:var(--color-bg);padding-bottom:calc(var(--safe-b) + 10px);
+}
+.tab{
+  background:none;border:0;padding:11px 0 7px;cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;gap:6px;min-height:52px;-webkit-tap-highlight-color:transparent;
+}
+.tab-bar{width:22px;height:3px;background:transparent}
+.tab-label{font:600 9px/1 Archivo,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--ink5)}
+.tab.is-active .tab-bar{background:var(--color-accent)}
+.tab.is-active .tab-label{color:var(--color-accent)}
+
+/* ---- toast ---- */
+#toast{
+  position:fixed;left:50%;bottom:calc(var(--safe-b) + 84px);transform:translateX(-50%) translateY(12px);
+  background:var(--ink);color:var(--color-bg);font:600 12px/1 Archivo,sans-serif;letter-spacing:.02em;
+  padding:11px 16px;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;z-index:50;
+  max-width:86%;text-align:center;
+}
+#toast.is-shown{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ---- palette switch (only visible on login, matches the two proposed brand directions) ---- */
+.paleta-row{display:flex;align-items:center;gap:10px;padding:14px 18px 0}
+.temabtn{font:600 9px/1 Archivo,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:8px 11px;border:1px solid var(--ink45);background:transparent;color:var(--color-text);cursor:pointer}
+.temabtn.is-active{background:var(--ink);color:var(--color-bg);border-color:var(--ink)}
+
+@media (min-width:560px){
+  #app{max-width:480px;margin:0 auto;border-left:1px solid var(--ink2);border-right:1px solid var(--ink2)}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="appbar">
+    <button class="iconbtn" id="backBtn" hidden aria-label="Atrás">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="appbar-left">
+      <div class="wordmark-wrap">
+        <div class="wordmark">AV<span class="accent">A</span>L</div>
+        <div class="tagline">Empresas verificadas · Colombia</div>
+      </div>
+    </div>
+    <div class="appbar-actions">
+      <button class="iconbtn" id="bellBtn" aria-label="Notificaciones">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 003.4 0"/></svg>
+        <span class="dot"></span>
+      </button>
+      <button class="iconbtn" id="gearBtn" aria-label="Cambiar paleta">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 008 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9c.14.61.67 1.05 1.3 1.05H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="screens">
+
+    <!-- ============ LOGIN ============ -->
+    <section class="screen" id="screen-login">
+      <div class="ph" style="height:158px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 15l5-5 4 4 3-3 6 6"/><circle cx="8" cy="9" r="1.5"/></svg>
+        Suelta aquí la foto de portada
+      </div>
+      <div style="padding:24px 18px 0 18px">
+        <h1 style="font-size:33px;line-height:1.03">Haz negocios<br>con empresas<br>que <span style="color:var(--color-accent)">sí existen.</span></h1>
+        <p style="font-size:13px;line-height:1.6;color:var(--ink68);margin:14px 0 0">Cada perfil se cruza con el registro mercantil. Sin NIT verificado no hay cuenta.</p>
+        <hr class="hr">
+        <div class="field" style="margin-bottom:14px">
+          <label for="loginPhone">Número de móvil</label>
+          <input class="input" id="loginPhone" placeholder="300 000 0000" style="min-height:46px" inputmode="tel">
+        </div>
+        <div class="field">
+          <label for="loginPass">Contraseña</label>
+          <input class="input" id="loginPass" type="password" placeholder="••••••••" style="min-height:46px">
+        </div>
+        <button class="btn btn-primary btn-block" style="min-height:48px;margin-top:20px;font-size:15px" data-nav="feed">
+          Iniciar sesión
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="margin-left:auto"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+        <button class="btn btn-secondary btn-block" style="min-height:48px;margin-top:8px;font-size:15px" data-nav="registro">
+          Registrar mi empresa
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="margin-left:auto"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <a href="#" style="display:inline-block;font-size:12.5px;margin-top:16px;border-bottom:1px solid var(--color-accent)" data-toast="Función no disponible en este prototipo">¿Olvidaste tu contraseña?</a>
+        <div style="margin-top:26px;border-top:2px solid var(--ink4);padding-top:11px">
+          <div class="kick">Con el aval de</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px">
+            <div style="border:1px dashed var(--ink45);padding:11px;font:600 8px/1.5 Archivo,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--ink5)">[ Logo ]<br>Cámaras de Comercio</div>
+            <div style="border:1px dashed var(--ink45);padding:11px;font:600 8px/1.5 Archivo,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--ink5)">[ Logo ]<br>MinComercio</div>
+          </div>
+        </div>
+        <div class="paleta-row" style="padding:0;margin-top:22px">
+          <span class="kick">Paleta</span>
+          <button class="temabtn is-active" id="temaTinta" type="button">Tinta · rojo</button>
+          <button class="temabtn" id="temaAzul" type="button" style="border-left:0">Azul institucional</button>
+        </div>
+        <div style="height:24px"></div>
+      </div>
+    </section>
+
+    <!-- ============ REGISTRO ============ -->
+    <section class="screen" id="screen-registro" hidden>
+      <div style="padding:20px 18px 40px">
+        <div style="display:flex;gap:4px;margin-bottom:14px">
+          <div style="flex:1;height:5px;background:var(--color-accent)"></div>
+          <div style="flex:1;height:5px;background:var(--color-accent)"></div>
+          <div style="flex:1;height:5px;background:var(--ink2)"></div>
+        </div>
+        <div class="kick">Paso 2 de 3 · Verificación</div>
+        <h2 style="font-size:27px;margin:8px 0 0;line-height:1.05">Tu NIT hace<br>el trabajo pesado.</h2>
+        <p style="font-size:12.5px;line-height:1.6;color:var(--ink68);margin:10px 0 0">Escríbelo y traemos razón social, fecha de constitución y estado de la matrícula desde la Cámara de Comercio.</p>
+        <hr class="hr">
+        <div class="field">
+          <label for="nitInput">NIT o ID tributaria</label>
+          <input class="input" id="nitInput" value="901359546" style="min-height:46px;font:800 19px/1 Archivo,sans-serif;letter-spacing:.06em">
+        </div>
+        <div style="border:2px solid var(--ink);padding:13px;margin-top:14px">
+          <div style="display:flex;align-items:center;gap:7px">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--color-accent)" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+            <span style="font:800 12px/1 Archivo,sans-serif;letter-spacing:.06em;text-transform:uppercase">Matrícula activa</span>
+          </div>
+          <div style="font:800 18px/1.15 Archivo,sans-serif;margin-top:10px;letter-spacing:-.02em">Codesah Tecnología S.A.S.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--ink22);margin-top:11px">
+            <div style="background:var(--color-bg);padding:8px 0"><div class="statl" style="margin:0">Constituida</div><div style="font-size:13px;font-weight:600;margin-top:3px">12 / 03 / 2018</div></div>
+            <div style="background:var(--color-bg);padding:8px 0 8px 10px"><div class="statl" style="margin:0">Cámara</div><div style="font-size:13px;font-weight:600;margin-top:3px">Cali · Valle</div></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
+          <div class="field"><label for="siglaInput">Sigla</label><input class="input" id="siglaInput" placeholder="CODESAH" style="min-height:42px"></div>
+          <div class="field"><label for="sectorInput">Sector</label><input class="input" id="sectorInput" value="Tecnología" style="min-height:42px"></div>
+        </div>
+        <div class="field" style="margin-top:12px"><label for="correoInput">Correo corporativo</label><input class="input" id="correoInput" placeholder="contacto@empresa.com.co" style="min-height:42px"></div>
+        <button class="btn btn-primary btn-block" style="min-height:48px;margin-top:20px;font-size:15px" data-nav="perfil">
+          Confirmar y continuar
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="margin-left:auto"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+        <p style="font-size:11px;line-height:1.55;color:var(--ink55);margin-top:12px">Al continuar autorizas la consulta de tu matrícula mercantil y de antecedentes fiscales públicos.</p>
+      </div>
+    </section>
+
+    <!-- ============ FEED ============ -->
+    <section class="screen" id="screen-feed" hidden>
+      <div style="padding-bottom:20px">
+        <div style="padding:14px 0 12px;border-bottom:2px solid var(--ink4)">
+          <div class="kick" style="padding:0 18px">Historias de empresas</div>
+          <div class="sb" style="display:flex;gap:10px;overflow-x:auto;padding:10px 18px 0">
+            <div style="flex:none;width:62px;cursor:pointer" data-nav="perfil"><div class="mono" style="height:62px;width:62px;outline:2px solid var(--color-accent);outline-offset:2px;background:var(--ink);color:var(--color-bg);font-size:21px">CS</div><div style="font:600 8.5px/1.25 Archivo,sans-serif;text-align:center;margin-top:7px;letter-spacing:.02em">Codesah</div></div>
+            <div style="flex:none;width:62px;cursor:pointer" data-nav="perfil"><div class="mono" style="height:62px;width:62px;outline:2px solid var(--color-accent);outline-offset:2px;background:var(--ink);color:var(--color-bg);font-size:21px">AP</div><div style="font:600 8.5px/1.25 Archivo,sans-serif;text-align:center;margin-top:7px;letter-spacing:.02em">Aluminios</div></div>
+            <div style="flex:none;width:62px;cursor:pointer" data-nav="perfil"><div class="mono" style="height:62px;width:62px;outline:2px solid var(--color-accent);outline-offset:2px;background:var(--ink);color:var(--color-bg);font-size:21px">AH</div><div style="font:600 8.5px/1.25 Archivo,sans-serif;text-align:center;margin-top:7px;letter-spacing:.02em">Agroaromas</div></div>
+            <div style="flex:none;width:62px;cursor:pointer" data-nav="perfil"><div class="mono" style="height:62px;width:62px;outline:2px solid var(--color-accent);outline-offset:2px;background:var(--ink);color:var(--color-bg);font-size:21px">SV</div><div style="font:600 8.5px/1.25 Archivo,sans-serif;text-align:center;margin-top:7px;letter-spacing:.02em">Segurivalle</div></div>
+            <div style="flex:none;width:62px;cursor:pointer" data-nav="perfil"><div class="mono" style="height:62px;width:62px;outline:2px solid var(--color-accent);outline-offset:2px;background:var(--ink);color:var(--color-bg);font-size:21px">LN</div><div style="font:600 8.5px/1.25 Archivo,sans-serif;text-align:center;margin-top:7px;letter-spacing:.02em">La Nueva</div></div>
+            <div style="flex:none;width:62px;cursor:pointer" data-nav="perfil"><div class="mono" style="height:62px;width:62px;outline:2px solid var(--color-accent);outline-offset:2px;background:var(--ink);color:var(--color-bg);font-size:21px">TC</div><div style="font:600 8.5px/1.25 Archivo,sans-serif;text-align:center;margin-top:7px;letter-spacing:.02em">Transcali</div></div>
+          </div>
+        </div>
+
+        <div style="padding:14px 18px 0">
+          <div style="border:2px solid var(--color-accent);padding:12px">
+            <div style="display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;background:var(--color-accent)"></span><span class="kick" style="color:var(--color-accent-700)">Lectura de tu IA</span></div>
+            <p style="font-size:13px;line-height:1.55;margin:8px 0 10px">Tres empresas de Cali buscaron <strong>“soporte de redes”</strong> esta semana. Tu perfil aparece pero no tienes ese servicio listado.</p>
+            <button class="btn btn-primary" style="font-size:12.5px;padding:8px 12px" data-nav="reco">Ver recomendaciones</button>
+          </div>
+        </div>
+
+        <div style="padding:18px 18px 0">
+          <div class="rulehd"><span class="kick">Movimiento en tu red</span><span class="kick">Hoy</span></div>
+
+          <div style="border-bottom:2px solid var(--ink4);padding-bottom:16px">
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <div class="mono" style="height:44px;width:44px;flex:none;background:var(--ink);color:var(--color-bg);font-size:15px">AP</div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:5px">
+                  <span style="font:800 15px/1.15 Archivo,sans-serif;letter-spacing:-.01em">Aluminios del Pacífico</span>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="color:var(--color-accent)"><path d="M12 1l2.6 2.1 3.3-.3.9 3.2 2.9 1.6-1.2 3.1 1.2 3.1-2.9 1.6-.9 3.2-3.3-.3L12 21l-2.6-2.1-3.3.3-.9-3.2L2.3 14l1.2-3.1L2.3 7.8l2.9-1.6.9-3.2 3.3.3z"/><path d="M8 12.2l2.6 2.6L16 9.4" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+                </div>
+                <div style="font:600 9px/1 Archivo,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--ink55);margin-top:4px">Industrial · Yumbo · hace 2 h</div>
+              </div>
+              <button class="btn btn-secondary" style="font-size:11.5px;padding:6px 10px" data-follow>Seguir</button>
+            </div>
+            <p style="font-size:13.5px;line-height:1.55;margin:11px 0 0">Ampliamos planta: ahora cortamos perfilería a medida en 48 horas para constructoras del suroccidente.</p>
+            <div class="ph" style="height:170px;margin-top:11px">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 15l5-5 4 4 3-3 6 6"/><circle cx="8" cy="9" r="1.5"/></svg>
+              Suelta aquí la foto de la publicación
+            </div>
+            <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+              <span class="tag tag-accent">Perfilería</span>
+              <span class="tag tag-neutral">Construcción</span>
+              <span class="tag tag-outline">Entrega 48 h</span>
+            </div>
+            <div style="display:flex;gap:16px;margin-top:12px;align-items:center">
+              <button class="btn btn-ghost" style="font-size:12px;padding:4px 0" data-like data-count="24">Me interesa · 24</button>
+              <button class="btn btn-ghost" style="font-size:12px;padding:4px 0" data-nav="chat">Cotizar</button>
+              <span style="margin-left:auto" class="statl">Verificada 2019</span>
+            </div>
+          </div>
+
+          <div style="padding-top:16px">
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <div class="mono" style="height:44px;width:44px;flex:none;background:var(--color-accent);color:var(--color-bg);font-size:15px">AH</div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:5px">
+                  <span style="font:800 15px/1.15 Archivo,sans-serif;letter-spacing:-.01em">Agroaromas del Huila</span>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="color:var(--color-accent)"><path d="M12 1l2.6 2.1 3.3-.3.9 3.2 2.9 1.6-1.2 3.1 1.2 3.1-2.9 1.6-.9 3.2-3.3-.3L12 21l-2.6-2.1-3.3.3-.9-3.2L2.3 14l1.2-3.1L2.3 7.8l2.9-1.6.9-3.2 3.3.3z"/><path d="M8 12.2l2.6 2.6L16 9.4" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+                </div>
+                <div style="font:600 9px/1 Archivo,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--ink55);margin-top:4px">Agroindustria · Neiva · hace 5 h</div>
+              </div>
+              <button class="btn btn-secondary" style="font-size:11.5px;padding:6px 10px" data-follow>Seguir</button>
+            </div>
+            <p style="font-size:13.5px;line-height:1.55;margin:11px 0 0">Buscamos empaque flexible con barrera de aroma. Volumen: 40.000 unidades / mes.</p>
+            <div style="border-left:3px solid var(--color-accent);padding:9px 0 9px 11px;margin-top:11px;background:var(--color-accent-100)">
+              <div class="kick" style="color:var(--color-accent-700)">Oportunidad abierta</div>
+              <div style="font-size:12.5px;margin-top:5px;line-height:1.5">Cierra en 6 días · 11 empresas ya respondieron</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PERFIL ============ -->
+    <section class="screen" id="screen-perfil" hidden>
+      <div style="padding-bottom:24px">
+        <div class="ph" style="height:118px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 15l5-5 4 4 3-3 6 6"/><circle cx="8" cy="9" r="1.5"/></svg>
+          Suelta aquí la portada de la empresa
+        </div>
+        <div style="padding:0 18px">
+          <div style="display:flex;gap:12px;align-items:flex-end;margin-top:-26px">
+            <div class="mono" style="height:76px;width:76px;border:3px solid var(--color-bg);background:var(--color-accent);color:var(--color-bg);font-size:26px">CS</div>
+            <div style="padding-bottom:4px;display:flex;gap:6px">
+              <button class="btn btn-primary" style="font-size:12.5px;padding:8px 14px" data-follow>Seguir</button>
+              <button class="btn btn-secondary" style="font-size:12.5px;padding:8px 14px" data-nav="chat">Contactar</button>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:13px">
+            <h2 style="font-size:26px">Codesah S.A.S.</h2>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" style="color:var(--color-accent)"><path d="M12 1l2.6 2.1 3.3-.3.9 3.2 2.9 1.6-1.2 3.1 1.2 3.1-2.9 1.6-.9 3.2-3.3-.3L12 21l-2.6-2.1-3.3.3-.9-3.2L2.3 14l1.2-3.1L2.3 7.8l2.9-1.6.9-3.2 3.3.3z"/><path d="M8 12.2l2.6 2.6L16 9.4" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          </div>
+          <div style="font:600 9.5px/1 Archivo,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--ink55);margin-top:6px">NIT 901359546 · Cali, Valle · Tecnología</div>
+          <p style="font-size:13.5px;line-height:1.55;margin:11px 0 0">Infraestructura tecnológica para pymes del suroccidente. Redes, seguridad y soporte con SLA firmado.</p>
+
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:15px">
+            <div class="stat"><div class="statn">8</div><div class="statl">Años operando</div></div>
+            <div class="stat"><div class="statn">25</div><div class="statl">Empleos</div></div>
+            <div class="stat"><div class="statn">156</div><div class="statl">Seguidores</div></div>
+          </div>
+
+          <hr class="hr">
+          <div class="rulehd"><span class="kick">Confianza verificada</span></div>
+          <div style="display:flex;flex-direction:column;gap:1px;background:var(--ink22);border-top:1px solid var(--ink22);border-bottom:1px solid var(--ink22)">
+            <div style="background:var(--color-bg);padding:11px 0;display:flex;align-items:center;gap:9px">
+              <div style="border:1px dashed var(--ink45);width:46px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;font:600 7px/1 Archivo,sans-serif;color:var(--ink5)">LOGO</div>
+              <div style="flex:1"><div style="font-size:13px;font-weight:600">Cámara de Comercio de Cali</div><div class="statl" style="margin-top:3px">Matrícula renovada · 2026</div></div>
+              <span class="seal">Vigente</span>
+            </div>
+            <div style="background:var(--color-bg);padding:11px 0;display:flex;align-items:center;gap:9px">
+              <div style="border:1px dashed var(--ink45);width:46px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;font:600 7px/1 Archivo,sans-serif;color:var(--ink5)">LOGO</div>
+              <div style="flex:1"><div style="font-size:13px;font-weight:600">DIAN · Responsable de IVA</div><div class="statl" style="margin-top:3px">RUT actualizado · 04 / 2026</div></div>
+              <span class="seal">Al día</span>
+            </div>
+            <div style="background:var(--color-bg);padding:11px 0;display:flex;align-items:center;gap:9px">
+              <div style="border:1px dashed var(--ink45);width:46px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;font:600 7px/1 Archivo,sans-serif;color:var(--ink5)">LOGO</div>
+              <div style="flex:1"><div style="font-size:13px;font-weight:600">Contraloría · Antecedentes</div><div class="statl" style="margin-top:3px">Sin reportes fiscales</div></div>
+              <span class="seal">Limpio</span>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-block" style="min-height:42px;margin-top:10px;font-size:13px" data-nav="antecedentes">
+            Ver certificados completos
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="margin-left:auto"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+
+          <hr class="hr">
+          <div class="rulehd"><span class="kick">Servicios</span><span class="kick">4</span></div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <span class="tag tag-neutral" style="font-size:12px;padding:6px 11px">Redes y conectividad</span>
+            <span class="tag tag-neutral" style="font-size:12px;padding:6px 11px">Cámaras de seguridad</span>
+            <span class="tag tag-neutral" style="font-size:12px;padding:6px 11px">Soporte técnico</span>
+            <span class="tag tag-neutral" style="font-size:12px;padding:6px 11px">Equipos de cómputo</span>
+          </div>
+
+          <hr class="hr">
+          <div class="rulehd"><span class="kick">Referencias comerciales</span><span class="kick">9 negocios</span></div>
+          <div style="display:flex;gap:9px;align-items:flex-start;padding-bottom:12px;border-bottom:1px solid var(--ink22)">
+            <div class="mono" style="height:34px;width:34px;flex:none;background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink55);font-size:12px">AP</div>
+            <div>
+              <div style="font-size:13px;font-weight:600">Aluminios del Pacífico</div>
+              <div style="font:800 12px/1 Archivo,sans-serif;color:var(--color-accent);letter-spacing:.14em;margin-top:4px">★★★★★</div>
+              <p style="font-size:12.5px;line-height:1.5;margin:6px 0 0;color:var(--ink8)">Cablearon la planta nueva en dos semanas. Facturaron como se acordó.</p>
+            </div>
+          </div>
+          <div style="display:flex;gap:9px;align-items:flex-start;padding-top:12px">
+            <div class="mono" style="height:34px;width:34px;flex:none;background:var(--ink);color:var(--color-bg);font-size:12px">LN</div>
+            <div>
+              <div style="font-size:13px;font-weight:600">Panadería La Nueva</div>
+              <div style="font:800 12px/1 Archivo,sans-serif;color:var(--color-accent);letter-spacing:.14em;margin-top:4px">★★★★☆</div>
+              <p style="font-size:12.5px;line-height:1.5;margin:6px 0 0;color:var(--ink8)">Buen soporte. La instalación se corrió tres días.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ IA (asistente) ============ -->
+    <section class="screen" id="screen-ia" hidden>
+      <div style="display:flex;flex-direction:column;min-height:100%">
+        <div style="padding:14px 18px 12px;border-bottom:2px solid var(--ink4)">
+          <div style="display:flex;align-items:center;gap:7px">
+            <span style="width:9px;height:9px;background:var(--color-accent)"></span>
+            <span style="font:800 15px/1 Archivo,sans-serif;letter-spacing:-.01em">Asistente AVAL</span>
+          </div>
+          <div class="statl" style="margin-top:6px">Te lleva a la empresa correcta, no a una lista</div>
+        </div>
+        <div id="aiThread" style="flex:1;padding:16px 18px 10px;display:flex;flex-direction:column;gap:14px">
+          <div style="align-self:flex-end;max-width:84%;background:var(--ink);color:var(--color-bg);padding:11px 13px;font-size:13.5px;line-height:1.5">Necesito quien me instale cámaras en una bodega en Yumbo, con factura electrónica.</div>
+          <div style="max-width:92%">
+            <div class="kick" style="color:var(--color-accent-700);margin-bottom:6px">Asistente</div>
+            <div style="border:1px solid var(--ink3);padding:12px;font-size:13.5px;line-height:1.55">Encontré 3 empresas verificadas que cubren Yumbo y facturan electrónicamente. Las ordené por antecedentes al día y negocios cerrados aquí.</div>
+            <div style="margin-top:9px;border:2px solid var(--ink)">
+              <div style="display:flex;gap:10px;padding:11px;align-items:center;border-bottom:1px solid var(--ink22)">
+                <div class="mono" style="height:38px;width:38px;flex:none;background:var(--color-accent);color:var(--color-bg);font-size:13px">CS</div>
+                <div style="flex:1;min-width:0"><div style="font:800 13.5px/1.2 Archivo,sans-serif">Codesah S.A.S.</div><div class="statl" style="margin-top:3px">8 años · 9 negocios · DIAN al día</div></div>
+                <span class="seal">1</span>
+              </div>
+              <div style="display:flex;gap:10px;padding:11px;align-items:center;border-bottom:1px solid var(--ink22)">
+                <div class="mono" style="height:38px;width:38px;flex:none;background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink55);font-size:13px">SV</div>
+                <div style="flex:1;min-width:0"><div style="font:800 13.5px/1.2 Archivo,sans-serif">Segurivalle Ltda.</div><div class="statl" style="margin-top:3px">14 años · 4 negocios · DIAN al día</div></div>
+                <span class="seal">2</span>
+              </div>
+              <div style="padding:10px 11px;display:flex;gap:7px">
+                <button class="btn btn-primary" style="font-size:12px;padding:8px 12px;flex:1;justify-content:flex-start" data-nav="chat">Pedir cotización a las 3</button>
+                <button class="btn btn-secondary" style="font-size:12px;padding:8px 12px" data-nav="perfil">Ver perfil</button>
+              </div>
+            </div>
+          </div>
+          <div id="aiChips" style="display:flex;flex-wrap:wrap;gap:6px">
+            <button class="btn btn-secondary" style="font-size:11.5px;padding:7px 10px" data-chip="Proveedores de empaque">Proveedores de empaque</button>
+            <button class="btn btn-secondary" style="font-size:11.5px;padding:7px 10px" data-chip="¿Cómo verifico un NIT?">¿Cómo verifico un NIT?</button>
+            <button class="btn btn-secondary" style="font-size:11.5px;padding:7px 10px" data-chip="Empresas para exportar">Empresas para exportar</button>
+          </div>
+        </div>
+        <div style="flex:none;border-top:2px solid var(--ink4);padding:11px 18px 22px;display:flex;gap:7px;background:var(--color-bg)">
+          <input class="input" id="aiInput" placeholder="¿Qué necesita tu empresa?" style="min-height:44px;flex:1">
+          <button class="btn btn-primary" id="aiSendBtn" style="min-height:44px;padding:0 15px">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ BUSCAR ============ -->
+    <section class="screen" id="screen-buscar" hidden>
+      <div style="padding:14px 18px 24px">
+        <input class="input" id="buscarInput" placeholder="Buscar empresa, servicio o NIT" style="min-height:46px;font-size:14px">
+        <div class="sb" style="display:flex;gap:6px;overflow-x:auto;margin-top:11px;padding-bottom:2px">
+          <span class="tag tag-accent" style="flex:none;font-size:11.5px;padding:6px 11px">Valle del Cauca</span>
+          <span class="tag tag-neutral" style="flex:none;font-size:11.5px;padding:6px 11px">Verificadas</span>
+          <span class="tag tag-neutral" style="flex:none;font-size:11.5px;padding:6px 11px">+5 años</span>
+          <span class="tag tag-neutral" style="flex:none;font-size:11.5px;padding:6px 11px">DIAN al día</span>
+        </div>
+
+        <hr class="hr">
+        <div class="rulehd"><span class="kick">Sectores</span><span class="kick">Ver todos</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--ink22);border:1px solid var(--ink22)">
+          <div class="sector" style="background:var(--color-bg);padding:13px 9px;cursor:pointer"><div style="font:800 17px/1 Archivo,sans-serif;color:var(--color-accent)">412</div><div style="font:600 10px/1.3 Archivo,sans-serif;margin-top:6px">Tecnología</div></div>
+          <div class="sector" style="background:var(--color-bg);padding:13px 9px;cursor:pointer"><div style="font:800 17px/1 Archivo,sans-serif;color:var(--color-accent)">286</div><div style="font:600 10px/1.3 Archivo,sans-serif;margin-top:6px">Industria</div></div>
+          <div class="sector" style="background:var(--color-bg);padding:13px 9px;cursor:pointer"><div style="font:800 17px/1 Archivo,sans-serif;color:var(--color-accent)">193</div><div style="font:600 10px/1.3 Archivo,sans-serif;margin-top:6px">Agro</div></div>
+          <div class="sector" style="background:var(--color-bg);padding:13px 9px;cursor:pointer"><div style="font:800 17px/1 Archivo,sans-serif;color:var(--color-accent)">157</div><div style="font:600 10px/1.3 Archivo,sans-serif;margin-top:6px">Transporte</div></div>
+          <div class="sector" style="background:var(--color-bg);padding:13px 9px;cursor:pointer"><div style="font:800 17px/1 Archivo,sans-serif;color:var(--color-accent)">241</div><div style="font:600 10px/1.3 Archivo,sans-serif;margin-top:6px">Construcción</div></div>
+          <div class="sector" style="background:var(--color-bg);padding:13px 9px;cursor:pointer"><div style="font:800 17px/1 Archivo,sans-serif;color:var(--color-accent)">508</div><div style="font:600 10px/1.3 Archivo,sans-serif;margin-top:6px">Comercio</div></div>
+        </div>
+
+        <hr class="hr">
+        <div class="rulehd"><span class="kick">348 resultados</span><span class="kick">Por confianza</span></div>
+
+        <div class="row" style="align-items:flex-start">
+          <div class="mono" style="height:46px;width:46px;background:var(--ink);color:var(--color-bg);font-size:16px">SV</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:5px"><span style="font:800 14px/1.2 Archivo,sans-serif;letter-spacing:-.01em">Segurivalle Ltda.</span><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="color:var(--color-accent)"><path d="M12 1l2.6 2.1 3.3-.3.9 3.2 2.9 1.6-1.2 3.1 1.2 3.1-2.9 1.6-.9 3.2-3.3-.3L12 21l-2.6-2.1-3.3.3-.9-3.2L2.3 14l1.2-3.1L2.3 7.8l2.9-1.6.9-3.2 3.3.3z"/><path d="M8 12.2l2.6 2.6L16 9.4" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div>
+            <div class="statl" style="margin-top:4px">14 años · Yumbo · DIAN al día</div>
+            <div style="font-size:12.5px;line-height:1.45;margin-top:6px;color:var(--ink8)">CCTV, control de acceso y monitoreo 24/7 para plantas industriales.</div>
+          </div>
+          <button class="btn btn-secondary" style="font-size:11.5px;padding:6px 9px;flex:none" data-nav="perfil">Ver</button>
+        </div>
+        <div class="row" style="align-items:flex-start">
+          <div class="mono" style="height:46px;width:46px;background:var(--ink);color:var(--color-bg);font-size:16px">RS</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:5px"><span style="font:800 14px/1.2 Archivo,sans-serif;letter-spacing:-.01em">Redes del Sur S.A.S.</span><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="color:var(--color-accent)"><path d="M12 1l2.6 2.1 3.3-.3.9 3.2 2.9 1.6-1.2 3.1 1.2 3.1-2.9 1.6-.9 3.2-3.3-.3L12 21l-2.6-2.1-3.3.3-.9-3.2L2.3 14l1.2-3.1L2.3 7.8l2.9-1.6.9-3.2 3.3.3z"/><path d="M8 12.2l2.6 2.6L16 9.4" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div>
+            <div class="statl" style="margin-top:4px">6 años · Palmira · DIAN al día</div>
+            <div style="font-size:12.5px;line-height:1.45;margin-top:6px;color:var(--ink8)">Cableado estructurado certificado y fibra para bodegas.</div>
+          </div>
+          <button class="btn btn-secondary" style="font-size:11.5px;padding:6px 9px;flex:none" data-nav="perfil">Ver</button>
+        </div>
+        <div class="row" style="align-items:flex-start">
+          <div class="mono" style="height:46px;width:46px;background:var(--ink);color:var(--color-bg);font-size:16px">CS</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:5px"><span style="font:800 14px/1.2 Archivo,sans-serif;letter-spacing:-.01em">Codesah S.A.S.</span><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="color:var(--color-accent)"><path d="M12 1l2.6 2.1 3.3-.3.9 3.2 2.9 1.6-1.2 3.1 1.2 3.1-2.9 1.6-.9 3.2-3.3-.3L12 21l-2.6-2.1-3.3.3-.9-3.2L2.3 14l1.2-3.1L2.3 7.8l2.9-1.6.9-3.2 3.3.3z"/><path d="M8 12.2l2.6 2.6L16 9.4" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div>
+            <div class="statl" style="margin-top:4px">8 años · Cali · 9 negocios cerrados</div>
+            <div style="font-size:12.5px;line-height:1.45;margin-top:6px;color:var(--ink8)">Infraestructura tecnológica con SLA firmado para pymes.</div>
+          </div>
+          <button class="btn btn-secondary" style="font-size:11.5px;padding:6px 9px;flex:none" data-nav="perfil">Ver</button>
+        </div>
+        <div class="row" style="align-items:flex-start;border-bottom:0">
+          <div class="mono" style="height:46px;width:46px;background:var(--ink);color:var(--color-bg);font-size:16px">AD</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:5px"><span style="font:800 14px/1.2 Archivo,sans-serif;letter-spacing:-.01em">Andina Digital</span><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="color:var(--color-accent)"><path d="M12 1l2.6 2.1 3.3-.3.9 3.2 2.9 1.6-1.2 3.1 1.2 3.1-2.9 1.6-.9 3.2-3.3-.3L12 21l-2.6-2.1-3.3.3-.9-3.2L2.3 14l1.2-3.1L2.3 7.8l2.9-1.6.9-3.2 3.3.3z"/><path d="M8 12.2l2.6 2.6L16 9.4" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div>
+            <div class="statl" style="margin-top:4px">3 años · Buga · DIAN al día</div>
+            <div style="font-size:12.5px;line-height:1.45;margin-top:6px;color:var(--ink8)">Soporte remoto y mantenimiento preventivo por suscripción.</div>
+          </div>
+          <button class="btn btn-secondary" style="font-size:11.5px;padding:6px 9px;flex:none" data-nav="perfil">Ver</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ RECO ============ -->
+    <section class="screen" id="screen-reco" hidden>
+      <div style="padding:16px 18px 28px">
+        <div class="kick" style="color:var(--color-accent-700)">Para Codesah S.A.S.</div>
+        <h2 style="font-size:26px;margin:8px 0 0;line-height:1.06">Lo que la IA<br>haría esta semana.</h2>
+        <p style="font-size:12.5px;line-height:1.6;color:var(--ink68);margin:10px 0 0">Calculado con tu sector, tu ciudad, lo que buscan otras empresas y los negocios que ya cerraste.</p>
+        <hr class="hr">
+
+        <div style="border:2px solid var(--ink);padding:13px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+            <div class="kick">Oportunidad · alta</div>
+            <span class="seal" style="background:var(--color-accent)">92 %</span>
+          </div>
+          <div style="font:800 17px/1.2 Archivo,sans-serif;margin-top:9px;letter-spacing:-.02em">Responde la solicitud de Agroaromas del Huila</div>
+          <p style="font-size:12.5px;line-height:1.55;margin:8px 0 0;color:var(--ink8)">Piden red y cámaras para su planta nueva. Ya cerraste dos proyectos casi idénticos.</p>
+          <button class="btn btn-primary btn-block" style="min-height:40px;font-size:12.5px;margin-top:11px" data-nav="chat">Abrir conversación<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" style="margin-left:auto"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </div>
+
+        <div style="border:1px solid var(--ink3);padding:13px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+            <div class="kick">Perfil · falta</div>
+            <span class="seal">+31 % vistas</span>
+          </div>
+          <div style="font:800 17px/1.2 Archivo,sans-serif;margin-top:9px;letter-spacing:-.02em">Agrega “Soporte de redes” a tus servicios</div>
+          <p style="font-size:12.5px;line-height:1.55;margin:8px 0 0;color:var(--ink8)">27 búsquedas en Cali este mes que tu perfil no está captando.</p>
+          <button class="btn btn-secondary btn-block" style="min-height:40px;font-size:12.5px;margin-top:11px" data-nav="perfil">Editar servicios<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" style="margin-left:auto"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </div>
+
+        <div style="border:1px solid var(--ink3);padding:13px">
+          <div class="kick">Networking</div>
+          <div style="font:800 17px/1.2 Archivo,sans-serif;margin-top:9px;letter-spacing:-.02em">4 empresas complementarias, no competencia</div>
+          <p style="font-size:12.5px;line-height:1.55;margin:8px 0 0;color:var(--ink8)">Instaladores eléctricos que subcontratan lo que tú haces.</p>
+          <div style="display:flex;gap:7px;margin-top:11px;align-items:center">
+            <div class="mono" style="height:42px;width:42px;background:var(--ink);color:var(--color-bg);font-size:14px">EL</div>
+            <div class="mono" style="height:42px;width:42px;background:var(--color-accent);color:var(--color-bg);font-size:14px">IM</div>
+            <div class="mono" style="height:42px;width:42px;background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink55);font-size:14px">VT</div>
+            <div class="mono" style="height:42px;width:42px;background:var(--ink);color:var(--color-bg);font-size:14px">RD</div>
+            <button class="btn btn-ghost" style="font-size:12px;margin-left:auto" data-nav="buscar">Ver</button>
+          </div>
+        </div>
+
+        <hr class="hr">
+        <p style="font-size:11px;line-height:1.55;color:var(--ink55)">Las recomendaciones usan datos públicos del registro mercantil y tu actividad en AVAL. Nunca el contenido de tus chats privados.</p>
+      </div>
+    </section>
+
+    <!-- ============ ANTECEDENTES ============ -->
+    <section class="screen" id="screen-antecedentes" hidden>
+      <div style="padding:16px 18px 28px">
+        <div class="kick">Antecedentes y certificados</div>
+        <h2 style="font-size:25px;margin:8px 0 0;line-height:1.06">Todo lo que otra empresa<br>puede comprobar de ti.</h2>
+        <hr class="hr">
+
+        <table class="table">
+          <thead><tr><th>Documento</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td><div style="font-weight:600;font-size:13px">Cámara de Comercio</div><div class="statl" style="margin-top:3px">Renovado 03/2026</div></td><td><span class="tag tag-accent">Vigente</span></td></tr>
+            <tr><td><div style="font-weight:600;font-size:13px">RUT · DIAN</div><div class="statl" style="margin-top:3px">Actualizado 04/2026</div></td><td><span class="tag tag-accent">Al día</span></td></tr>
+            <tr><td><div style="font-weight:600;font-size:13px">Antecedentes fiscales</div><div class="statl" style="margin-top:3px">Contraloría General</div></td><td><span class="tag tag-accent">Sin reportes</span></td></tr>
+            <tr><td><div style="font-weight:600;font-size:13px">Seguridad social</div><div class="statl" style="margin-top:3px">Planilla 08/2026</div></td><td><span class="tag tag-neutral">Por renovar</span></td></tr>
+          </tbody>
+        </table>
+
+        <div style="border:2px solid var(--ink);padding:13px;margin-top:18px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <div class="kick">Generar certificado</div>
+            <div style="border:1px dashed var(--ink45);padding:5px 8px;font:600 7.5px/1 Archivo,sans-serif;letter-spacing:.1em;color:var(--ink5)">[ LOGO ENTIDAD ]</div>
+          </div>
+          <div style="font:800 17px/1.2 Archivo,sans-serif;margin-top:10px;letter-spacing:-.02em">Antecedentes fiscales · Contraloría</div>
+          <div style="background:var(--color-surface);padding:10px;margin-top:10px;display:flex;align-items:center;justify-content:space-between">
+            <div><div class="statl" style="margin:0">NIT a consultar</div><div style="font:800 16px/1 Archivo,sans-serif;margin-top:5px;letter-spacing:.04em">901359546</div></div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12"/><path d="M5 15H4a1 1 0 01-1-1V4a1 1 0 011-1h10a1 1 0 011 1v1"/></svg>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0;margin-top:12px;border-top:1px solid var(--ink22)">
+            <div style="display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--ink22)"><span style="font:800 12px/1.3 Archivo,sans-serif;color:var(--color-accent)">1</span><span style="font-size:12.5px;line-height:1.35">Te llevamos al sitio oficial de la Contraloría</span></div>
+            <div style="display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--ink22)"><span style="font:800 12px/1.3 Archivo,sans-serif;color:var(--color-accent)">2</span><span style="font-size:12.5px;line-height:1.35">Se consulta con tu NIT, ya precargado</span></div>
+            <div style="display:flex;gap:9px;padding:9px 0"><span style="font:800 12px/1.3 Archivo,sans-serif;color:var(--color-accent)">3</span><span style="font-size:12.5px;line-height:1.35">El PDF queda guardado en tu perfil público</span></div>
+          </div>
+          <button class="btn btn-primary btn-block" style="min-height:44px;font-size:13.5px;margin-top:12px" data-toast="Certificado generado (simulado)">Generar certificado<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="margin-left:auto"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg></button>
+        </div>
+
+        <hr class="hr">
+        <div class="kick">Respaldado por</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px">
+          <div style="border:1px dashed var(--ink45);padding:13px;font:600 8px/1.5 Archivo,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--ink5)">[ Logo ]<br>Cámaras de Comercio</div>
+          <div style="border:1px dashed var(--ink45);padding:13px;font:600 8px/1.5 Archivo,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--ink5)">[ Logo ]<br>MinComercio</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CHAT ============ -->
+    <section class="screen" id="screen-chat" hidden>
+      <div style="display:flex;flex-direction:column;min-height:100%">
+        <div style="padding:12px 18px;border-bottom:2px solid var(--ink4);display:flex;align-items:center;gap:10px">
+          <div class="mono" style="height:38px;width:38px;flex:none;background:var(--color-accent);color:var(--color-bg);font-size:13px">AH</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:5px">
+              <span style="font:800 14px/1.2 Archivo,sans-serif">Agroaromas del Huila</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="color:var(--color-accent)"><path d="M12 1l2.6 2.1 3.3-.3.9 3.2 2.9 1.6-1.2 3.1 1.2 3.1-2.9 1.6-.9 3.2-3.3-.3L12 21l-2.6-2.1-3.3.3-.9-3.2L2.3 14l1.2-3.1L2.3 7.8l2.9-1.6.9-3.2 3.3.3z"/><path d="M8 12.2l2.6 2.6L16 9.4" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            </div>
+            <div class="statl" style="margin-top:3px">NIT verificado · 6 años · Neiva</div>
+          </div>
+          <button class="btn btn-secondary" style="font-size:11px;padding:6px 8px" data-nav="perfil">Perfil</button>
+        </div>
+        <div id="chatThread" style="flex:1;padding:14px 18px 10px;display:flex;flex-direction:column;gap:11px">
+          <div style="text-align:center"><span class="statl">Martes · 14 sep</span></div>
+          <div style="max-width:82%;border:1px solid var(--ink3);padding:10px 12px;font-size:13.5px;line-height:1.5">Buenas. Vimos su perfil por la recomendación de AVAL. ¿Cubren instalación en Neiva?</div>
+          <div style="align-self:flex-end;max-width:82%;background:var(--ink);color:var(--color-bg);padding:10px 12px;font-size:13.5px;line-height:1.5">Sí, con desplazamiento incluido desde 20 puntos. ¿Cuántos metros de planta?</div>
+          <div style="max-width:82%;border:1px solid var(--ink3);padding:10px 12px;font-size:13.5px;line-height:1.5">1.400 m². Les paso el plano.</div>
+          <div style="max-width:82%;border:1px solid var(--ink3);padding:10px 12px;display:flex;align-items:center;gap:9px">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--color-accent)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+            <div><div style="font-size:12.5px;font-weight:600">plano-planta-neiva.pdf</div><div class="statl" style="margin-top:2px">2,4 MB</div></div>
+          </div>
+          <div style="border-left:3px solid var(--color-accent);background:var(--color-accent-100);padding:9px 11px">
+            <div class="kick" style="color:var(--color-accent-700)">Sugerido por la IA</div>
+            <div style="font-size:12.5px;line-height:1.5;margin-top:5px">Envía tu cotización plantilla para bodegas de 1.000–2.000 m².</div>
+            <button class="btn btn-ghost" style="font-size:12px;padding:4px 0;margin-top:4px" data-toast="Plantilla adjuntada (simulado)">Adjuntar plantilla</button>
+          </div>
+        </div>
+        <div style="flex:none;border-top:2px solid var(--ink4);padding:11px 18px 22px;display:flex;gap:7px">
+          <input class="input" id="chatInput" placeholder="Escribe un mensaje" style="min-height:44px;flex:1">
+          <button class="btn btn-primary" id="chatSendBtn" style="min-height:44px;padding:0 15px">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="tabbar" id="tabbar">
+    <button class="tab" data-tab="feed"><span class="tab-bar"></span><span class="tab-label">Inicio</span></button>
+    <button class="tab" data-tab="buscar"><span class="tab-bar"></span><span class="tab-label">Buscar</span></button>
+    <button class="tab" data-tab="ia"><span class="tab-bar"></span><span class="tab-label">IA</span></button>
+    <button class="tab" data-tab="chat"><span class="tab-bar"></span><span class="tab-label">Chats</span></button>
+    <button class="tab" data-tab="perfil"><span class="tab-bar"></span><span class="tab-label">Perfil</span></button>
+  </nav>
+
+  <div id="toast"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var NO_TABS = { login:true, registro:true };
+  var state = { screen: 'login', stack: [], tema: 'tinta' };
+
+  try {
+    var saved = JSON.parse(localStorage.getItem('aval-proto') || 'null');
+    if (saved && typeof saved === 'object') {
+      if (saved.screen) state.screen = saved.screen;
+      if (saved.tema) state.tema = saved.tema;
+    }
+  } catch (e) {}
+
+  function persist(){
+    try { localStorage.setItem('aval-proto', JSON.stringify({ screen: state.screen, tema: state.tema })); } catch(e){}
+  }
+
+  function render(){
+    document.querySelectorAll('.screen').forEach(function(el){
+      el.hidden = el.id !== 'screen-' + state.screen;
+    });
+    document.getElementById('tabbar').hidden = !!NO_TABS[state.screen];
+    document.querySelectorAll('.tab').forEach(function(btn){
+      btn.classList.toggle('is-active', btn.dataset.tab === state.screen);
+    });
+    document.getElementById('backBtn').hidden = state.stack.length === 0;
+    document.documentElement.setAttribute('data-tema', state.tema === 'azul' ? 'azul' : '');
+    document.getElementById('temaTinta').classList.toggle('is-active', state.tema !== 'azul');
+    document.getElementById('temaAzul').classList.toggle('is-active', state.tema === 'azul');
+    document.getElementById('screens').scrollTop = 0;
+    var activeScreen = document.getElementById('screen-' + state.screen);
+    if (activeScreen) activeScreen.scrollTop = 0;
+    persist();
+  }
+
+  function goTo(id){
+    if (id === state.screen) return;
+    state.stack.push(state.screen);
+    state.screen = id;
+    render();
+  }
+  function goTab(id){
+    state.stack = [];
+    state.screen = id;
+    render();
+  }
+  function goBack(){
+    var prev = state.stack.pop();
+    if (prev) { state.screen = prev; render(); }
+  }
+  function setTema(t){
+    state.tema = t;
+    render();
+  }
+
+  var toastTimer = null;
+  function toast(msg){
+    var el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('is-shown');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.classList.remove('is-shown'); }, 1700);
+  }
+
+  document.body.addEventListener('click', function(e){
+    var navEl = e.target.closest('[data-nav]');
+    if (navEl) { goTo(navEl.dataset.nav); return; }
+
+    var tabEl = e.target.closest('[data-tab]');
+    if (tabEl) { goTab(tabEl.dataset.tab); return; }
+
+    var toastEl = e.target.closest('[data-toast]');
+    if (toastEl) { e.preventDefault(); toast(toastEl.dataset.toast); return; }
+
+    var chipEl = e.target.closest('[data-chip]');
+    if (chipEl) {
+      appendBubble('aiThread', chipEl.dataset.chip);
+      chipEl.disabled = true;
+      chipEl.style.opacity = '.4';
+      return;
+    }
+
+    var followEl = e.target.closest('[data-follow]');
+    if (followEl) {
+      var on = followEl.dataset.following === '1';
+      followEl.dataset.following = on ? '0' : '1';
+      followEl.textContent = on ? 'Seguir' : 'Siguiendo';
+      followEl.classList.toggle('btn-primary', on);
+      followEl.classList.toggle('btn-secondary', !on);
+      return;
+    }
+
+    var likeEl = e.target.closest('[data-like]');
+    if (likeEl && !likeEl.disabled) {
+      var count = parseInt(likeEl.dataset.count, 10) + 1;
+      likeEl.textContent = 'Te interesa · ' + count;
+      likeEl.disabled = true;
+      return;
+    }
+
+    var sectorEl = e.target.closest('.sector');
+    if (sectorEl) {
+      sectorEl.style.boxShadow = 'inset 0 0 0 2px var(--color-accent)';
+      return;
+    }
+
+    if (e.target.closest('#backBtn')) { goBack(); return; }
+    if (e.target.closest('#bellBtn')) { toast('No tienes notificaciones nuevas'); return; }
+    if (e.target.closest('#gearBtn')) { setTema(state.tema === 'azul' ? 'tinta' : 'azul'); return; }
+    if (e.target.closest('#temaTinta')) { setTema('tinta'); return; }
+    if (e.target.closest('#temaAzul')) { setTema('azul'); return; }
+  });
+
+  function appendBubble(threadId, text){
+    var thread = document.getElementById(threadId);
+    var bubble = document.createElement('div');
+    bubble.style.alignSelf = 'flex-end';
+    bubble.style.maxWidth = '84%';
+    bubble.style.background = 'var(--ink)';
+    bubble.style.color = 'var(--color-bg)';
+    bubble.style.padding = '11px 13px';
+    bubble.style.fontSize = '13.5px';
+    bubble.style.lineHeight = '1.5';
+    bubble.textContent = text;
+    thread.appendChild(bubble);
+    thread.parentElement.scrollTop = thread.parentElement.scrollHeight;
+  }
+
+  function wireComposer(inputId, btnId, threadId){
+    var input = document.getElementById(inputId);
+    var btn = document.getElementById(btnId);
+    function send(){
+      var t = input.value.trim();
+      if (!t) return;
+      appendBubble(threadId, t);
+      input.value = '';
+    }
+    btn.addEventListener('click', send);
+    input.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); send(); } });
+  }
+  wireComposer('aiInput', 'aiSendBtn', 'aiThread');
+  wireComposer('chatInput', 'chatSendBtn', 'chatThread');
+
+  render();
+})();
+</script>
+</body>
+</html>
