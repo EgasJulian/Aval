@@ -9,6 +9,7 @@
 (function () {
   'use strict';
   const DB_KEY = 'colw_db';
+  const SEED_VERSION = 2; // al cambiar los datos de ejemplo, súbelo para recargarlos en los dispositivos
 
   // ---------------------------------------------------------------- utilidades
   const hex = (n) => Array.from(crypto.getRandomValues(new Uint8Array(n)), (b) => b.toString(16).padStart(2, '0')).join('');
@@ -122,19 +123,34 @@ module.exports = function seed({ hashPassword, uid }) {
   maria.following.push(andes.id, agro.id);
 
   const likers = (n) => users.slice(0, n).map((u) => u.id);
-  const posts = [
-    { userId: andes.id, title: 'Ideas que transforman realidades', text: 'Lanzamos nuestro nuevo laboratorio de IA aplicada para pymes colombianas. #Innovación #InteligenciaArtificial #Colombia', theme: 'tech', h: 2, likes: 9 },
-    { userId: agro.id, title: 'El campo también innova', text: 'Sensores de humedad y trazabilidad para el café caucano. ¡Buscamos aliados tecnológicos! #CampoSostenible #DesarrolloRural #Cauca', theme: 'agro', h: 5, likes: 7 },
-    { userId: maria.id, title: 'Sin fronteras para tus ideas', text: 'Taller gratuito: cómo exportar tus servicios a Latinoamérica en 90 días. #Negocios #Internacionalización', theme: 'travel', h: 24, likes: 10 },
-    { userId: constru.id, title: 'Espacios que conectan personas', text: 'Iniciamos obra del nuevo proyecto de vivienda en el Valle de Aburrá. #Infraestructura #Vivienda #Desarrollo', theme: 'build', h: 26, likes: 5 },
-    { userId: codesah.id, title: 'Soluciones empresariales', text: 'Instalamos cámaras de seguridad y redes para 5 nuevos clientes este mes. ¡Gracias por confiar en nosotros! #Tecnología #Cali', theme: 'tech', h: 30, likes: 8 },
-    { userId: eco.id, title: 'Energía limpia para todos', text: 'Más de 150 techos solares instalados en la Costa Caribe. #Energía #Sostenibilidad', theme: 'energy', h: 48, likes: 6 },
-    { userId: logi.id, title: 'Llevamos tu negocio más lejos', text: 'Nueva ruta diaria Buenaventura – Bogotá. #Logística #Transporte', theme: 'logistics', h: 60, likes: 4 },
-  ].map((p) => ({ id: uid(), userId: p.userId, title: p.title, text: p.text, tags: (p.text.match(/#[\p{L}\p{N}_]+/gu) || []).map((t) => t.slice(1)),
-    image: null, theme: p.theme, createdAt: ago(p.h), likes: likers(p.likes).filter((id) => id !== p.userId), comments: [], shares: Math.floor(p.likes * 1.5) }));
-
-  posts[0].comments.push({ id: uid(), userId: codesah.id, text: '¡Excelente iniciativa! Nos encantaría colaborar.', createdAt: ago(1) });
-  posts[4].comments.push({ id: uid(), userId: maria.id, text: 'Muy buen servicio, los recomiendo 👏', createdAt: ago(20) });
+  // Publicaciones de ejemplo con fotos reales (CC0, StockSnap) en img/feed/
+  const P = (author, h, likes, title, text, image, comments = []) => ({ author, h, likes, title, text, image, comments });
+  const C = (author, h, text) => ({ author, h, text });
+  const seedPosts = [
+    P(andes, 2, 9, 'Laboratorio de IA para pymes', 'Abrimos nuestro laboratorio de IA aplicada para pymes colombianas 🚀 Durante octubre hacemos un diagnóstico gratuito: te mostramos qué procesos de tu empresa se pueden automatizar. Cupos limitados, escríbenos por mensaje. #InteligenciaArtificial #Pymes #Innovación', 'andes-ia',
+      [C(codesah, 1, '¡Excelente iniciativa! Nos encantaría colaborar.'), C(maria, 1.5, 'Me interesa para mis clientes de comercio exterior 🙌')]),
+    P(agro, 4, 8, 'Floración en el Cauca', 'Así se ven nuestros cafetales en plena floración 🌸☕ En unos ocho meses esta flor será la cosecha del próximo año. Seguimos midiendo la humedad con sensores para tener trazabilidad de cada lote. ¿Tienes tecnología para el campo? Hablemos. #CaféEspecial #Cauca #AgroTech', 'agro-cafe'),
+    P(codesah, 6, 8, 'Seguridad para tu negocio', 'Este mes instalamos cámaras de seguridad y redes para 5 nuevos clientes en Cali 📹 Monitoreo desde el celular, grabación en la nube y soporte técnico incluido. ¡Gracias por confiar en nosotros! #Seguridad #Tecnología #Cali', 'codesah-camaras',
+      [C(maria, 5, 'Muy buen servicio, los recomiendo 👏')]),
+    P(laura, 9, 10, '5 claves para vender en redes', '5 claves para que tu pyme venda en redes sociales 📱 1) Define a quién le hablas. 2) Publica con constancia, no con prisa. 3) Muestra tu equipo y tu proceso. 4) Responde rápido los mensajes. 5) Mide y ajusta cada mes. ¿Cuál te cuesta más? #MarketingDigital #Emprendimiento', 'laura-tips',
+      [C(andes, 8, 'La 4 es clave: responder rápido vende 💯')]),
+    P(constru, 20, 6, 'Inicio de obra', 'Arrancamos la obra de 240 apartamentos de vivienda VIS en el Valle de Aburrá 🏗️ Generaremos más de 300 empleos directos en la región. Buscamos proveedores de acero, concreto y acabados. #Construcción #Vivienda #Antioquia', 'constru-vivienda'),
+    P(maria, 26, 10, 'Taller: exporta tus servicios', 'Taller gratuito este jueves: cómo exportar tus servicios a Latinoamérica en 90 días 🌎 Veremos precios internacionales, contratos y cómo cobrar desde el exterior. Cupos limitados, inscríbete por mensaje. #Internacionalización #Negocios', 'maria-taller'),
+    P(eco, 30, 7, '150 techos solares', 'Llegamos a 150 techos solares instalados en la Costa Caribe ☀️ Nuestros clientes ahorran en promedio un 60 % en su factura de energía. ¿Quieres saber cuánto ahorrarías? Te hacemos el estudio sin costo. #EnergíaSolar #Sostenibilidad', 'eco-techos',
+      [C(constru, 28, '¿Trabajan también con proyectos de vivienda? Nos interesa para la nueva obra.')]),
+    P(indus, 36, 5, 'Nueva línea de producción', 'Pusimos en marcha una nueva línea de producción en nuestra planta de Yumbo ⚙️ Más capacidad para piezas metalmecánicas a la medida y entregas más rápidas para nuestros clientes. #Industria #Metalmecánica #Valle', 'indus-planta'),
+    P(logi, 44, 4, 'Nueva ruta diaria', 'Nueva ruta diaria Buenaventura – Bogotá 🚛 Salida todas las noches y entrega en 24 horas, con rastreo en tiempo real. Ideal para la carga de importación que llega al puerto. #Logística #Transporte', 'logi-ruta'),
+    P(agrof, 52, 6, 'Invernaderos que producen más', 'Nuevas plántulas en nuestro invernadero de Pereira 🌱 Con riego tecnificado usamos 40 % menos agua y la germinación es más pareja. Visitas guiadas para productores los sábados. #Agricultura #RiegoTecnificado #Risaralda', 'agrofuturo-invernadero'),
+    P(andes, 60, 9, '¡Estamos contratando!', '¡Estamos contratando! 👩‍💻 Buscamos 3 desarrolladores backend y 1 diseñador UX para nuestro equipo en Bogotá. Trabajo híbrido y proyectos de IA reales. Envía tu hoja de vida por mensaje. #Empleo #Tecnología #Bogotá', 'andes-equipo'),
+    P(codesah, 72, 5, 'Redes que no fallan', 'Cableado estructurado categoría 6 para oficinas 🔌 Terminamos la red de una empresa con 40 puestos de trabajo en solo 3 días, sin detener su operación. #Redes #Conectividad', 'codesah-redes'),
+    P(agro, 80, 10, 'Primer contenedor a Corea', '¡Lo logramos! Despachamos nuestro primer contenedor de café especial caucano a Corea del Sur ☕ Gracias a nuestros caficultores aliados por la calidad de cada grano. #Exportación #CaféEspecial', 'agro-export',
+      [C(maria, 78, '¡Felicitaciones! Un gran ejemplo de internacionalización 👏'), C(logi, 77, '¡Orgullosos de haber movido esa carga hasta el puerto!')]),
+    P(logi, 96, 5, 'Logística portuaria', 'Más de 1.200 contenedores movidos este trimestre en el puerto de Buenaventura 📦 Nos encargamos de trámites, almacenamiento y transporte hasta tu bodega. #ComercioExterior #Logística', 'logi-contenedores'),
+    P(indus, 110, 7, 'Becas para soldadores', 'Abrimos 10 becas para formar soldadores certificados en Yumbo 🔥 Al terminar, los mejores se vinculan a nuestra planta. Inscripciones abiertas hasta el 30 de octubre. #Empleo #Formación #Industria', 'indus-soldadura'),
+  ];
+  const posts = seedPosts.map((p) => ({ id: uid(), userId: p.author.id, title: p.title, text: p.text, tags: (p.text.match(/#[\p{L}\p{N}_]+/gu) || []).map((t) => t.slice(1)),
+    image: `img/feed/${p.image}.jpg`, theme: 'tech', createdAt: ago(p.h), likes: likers(p.likes).filter((id) => id !== p.author.id),
+    comments: p.comments.map((c) => ({ id: uid(), userId: c.author.id, text: c.text, createdAt: ago(c.h) })), shares: Math.floor(p.likes * 1.5) }));
 
   const messages = [
     { id: uid(), from: andes.id, to: codesah.id, text: 'Hola CODESAH, ¿manejan suministro de equipos de cómputo por volumen?', read: false, createdAt: ago(3) },
@@ -143,7 +159,7 @@ module.exports = function seed({ hashPassword, uid }) {
   ];
   const notifications = [
     { id: uid(), userId: codesah.id, fromId: andes.id, type: 'follow', text: 'AndesTech comenzó a seguirte.', read: false, createdAt: ago(4) },
-    { id: uid(), userId: codesah.id, fromId: maria.id, type: 'comment', text: 'María Fernanda Ruiz comentó: "Muy buen servicio, los recomiendo 👏"', read: false, createdAt: ago(20), postId: posts[4].id },
+    { id: uid(), userId: codesah.id, fromId: maria.id, type: 'comment', text: 'María Fernanda Ruiz comentó: "Muy buen servicio, los recomiendo 👏"', read: false, createdAt: ago(5), postId: posts[2].id },
   ];
 
   return { users, posts, messages, notifications, sessions: {}, resets: {} };
@@ -546,11 +562,12 @@ return module.exports; })();
       codesah.company.store = { ...storeApi.DEFAULT_STORE, ...(codesah.company.store || {}) };
     }
     d.storeSeeded = true;
+    d.seedVersion = SEED_VERSION;
     return d;
   }
   function loadDB() {
     try { db = JSON.parse(localStorage.getItem(DB_KEY) || 'null'); } catch { db = null; }
-    if (!db || !Array.isArray(db.users)) { db = freshDB(); saveDB(); }
+    if (!db || !Array.isArray(db.users) || db.seedVersion !== SEED_VERSION) { db = freshDB(); saveDB(); }
   }
   function saveDB() {
     try { localStorage.setItem(DB_KEY, JSON.stringify(db)); }

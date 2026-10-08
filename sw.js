@@ -1,6 +1,6 @@
 // ColW — service worker: guarda la app para abrirla rápido y sin conexión.
 // Los datos viven en el navegador (localStorage, ver js/mock-api.js).
-const CACHE = 'colw-v4';
+const CACHE = 'colw-v5';
 // Rutas relativas a la carpeta del service worker (funciona en GitHub Pages: /<repo>/).
 const SHELL = ['./', 'index.html', 'css/styles.css', 'css/glass.css', 'js/icons.js', 'js/mock-api.js', 'js/store.js', 'js/app.js', 'manifest.webmanifest',
   'img/codesah.svg', 'img/favicon.svg', 'img/icon-192.png', 'img/icon-512.png', 'img/apple-touch-icon.png', 'offline.html'];

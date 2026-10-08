@@ -120,7 +120,7 @@ function linkify(text) {
 }
 function banner(post) {
   const t = THEMES[post.theme] || THEMES.tech;
-  if (post.image) return `<div class="post-media"><img src="${esc(post.image)}" alt="${esc(post.title || 'Imagen')}"></div>`;
+  if (post.image) return `<div class="post-media photo"><img src="${esc(post.image)}" alt="${esc(post.title || 'Imagen')}"></div>`;
   return `<div class="post-media"><div class="banner" style="background:${t.bg}">
     <h3>${esc(post.title || (post.text || '').slice(0, 40))}</h3><span class="emoji">${t.emoji}</span>
     <span class="mark">Col<b>W</b></span></div></div>`;
@@ -482,21 +482,49 @@ async function viewFeed(params) {
       ${[...seen.values()].filter((p) => p.author.id !== me.id).map((p) => `<button class="story" data-story="${p.id}"><div class="ring">${avatar(p.author, 68)}</div><span>${esc(p.author.name.split(' ').slice(0, 2).join(' '))}</span></button>`).join('')}
       <a class="story" href="#/explorar"><div class="ring" style="background:var(--blue-100)"><div class="avatar" style="width:68px;height:68px;color:var(--blue-600)">${icon('users', 30)}</div></div><span>Más historias</span></a>`;
     $('#my-story').onclick = () => openPostModal();
-    $$('[data-story]').forEach((b) => (b.onclick = () => openStory(posts.find((p) => p.id === b.dataset.story))));
+    const list = [...seen.values()].filter((p) => p.author.id !== me.id);
+    $$('[data-story]').forEach((b) => (b.onclick = () => openStory(list, list.findIndex((p) => p.id === b.dataset.story))));
   }).catch(() => {});
   await load();
 }
-function openStory(post) {
+// Visor de historias estilo Instagram: toca a la derecha (o desliza a la izquierda) para la siguiente,
+// a la izquierda para la anterior; desliza hacia abajo o toca la X para cerrar.
+function openStory(list, start = 0) {
   const el = document.createElement('div');
   el.className = 'story-view';
-  const st = STORIES[post.author.handle];
-  el.innerHTML = `<div class="bar"><i></i></div><div class="who">${avatar(post.author, 40)} ${esc(post.author.name)} <small style="opacity:.7;font-weight:400">· ${timeAgo(post.createdAt)}</small></div>
-    <div class="frame">${st ? `<div class="post-media story-photo"><img src="${st.img}" alt=""></div>` : banner(post)}</div><p>${linkify(st ? st.text : post.text || '')}</p>
-    <button class="btn btn-outline btn-sm" id="sv-go">Ver perfil ${icon('arrowRight', 16)}</button>`;
   document.body.appendChild(el);
-  const close = () => { el.remove(); clearTimeout(t); };
-  const t = setTimeout(close, 5000);
-  el.addEventListener('click', (e) => { if (e.target.closest('#sv-go')) { close(); location.hash = '#/empresa/' + post.author.id; } else close(); });
+  let i = start, t = null, x0 = 0, y0 = 0;
+  const close = () => { clearTimeout(t); el.remove(); document.removeEventListener('keydown', onKey); };
+  const go = (n) => { if (n >= list.length) return close(); i = Math.max(0, n); show(); };
+  const onKey = (e) => { if (e.key === 'ArrowRight') go(i + 1); else if (e.key === 'ArrowLeft') go(i - 1); else if (e.key === 'Escape') close(); };
+  function show() {
+    clearTimeout(t);
+    const post = list[i];
+    const st = STORIES[post.author.handle];
+    el.innerHTML = `<div class="bars">${list.map((_, k) => `<span><i class="${k < i ? 'done' : k === i ? 'run' : ''}"></i></span>`).join('')}</div>
+      <div class="who">${avatar(post.author, 40)} <span class="grow">${esc(post.author.name)} <small style="opacity:.7;font-weight:400">· ${timeAgo(post.createdAt)}</small></span>
+        <button class="icon-btn sv-close" aria-label="Cerrar">${icon('x', 26)}</button></div>
+      <div class="frame">${st ? `<div class="post-media story-photo"><img src="${esc(st.img)}" alt=""></div>` : banner(post)}
+        <button class="sv-nav prev" aria-label="Historia anterior"></button><button class="sv-nav next" aria-label="Historia siguiente"></button></div>
+      <p>${linkify(st ? st.text : post.text || '')}</p>
+      <button class="btn btn-outline btn-sm" id="sv-go">Ver perfil ${icon('arrowRight', 16)}</button>`;
+    t = setTimeout(() => go(i + 1), 5000);
+  }
+  el.addEventListener('click', (e) => {
+    if (e.target.closest('#sv-go')) { const id = list[i].author.id; close(); location.hash = '#/empresa/' + id; }
+    else if (e.target.closest('.sv-close')) close();
+    else if (e.target.closest('.sv-nav.prev')) go(i - 1);
+    else if (e.target.closest('.sv-nav.next')) go(i + 1);
+    else if (e.target === el) close();
+  });
+  el.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+  el.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+    if (dy > 90 && Math.abs(dy) > Math.abs(dx)) close();
+    else if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? i + 1 : i - 1);
+  });
+  document.addEventListener('keydown', onKey);
+  show();
 }
 
 function renderPosts(container, posts, reload) {

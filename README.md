@@ -5,7 +5,7 @@ seguidores, mensajes, notificaciones, asistente virtual, antecedentes, enlace DI
 
 Es un sitio **100 % estático** (HTML/CSS/JS, sin servidor): las rutas de la API se resuelven en el navegador
 con `js/mock-api.js` y los datos se guardan en el dispositivo (localStorage). Por eso cada teléfono o
-navegador tiene sus propios datos. En **Ajustes → Restablecer datos de ejemplo** se vuelve al estado inicial.
+navegador tiene sus propios datos. En **Ajustes → Restablecer datos de ejemplo** se vuelve al estado inicial. Si cambias los datos de ejemplo en `js/mock-api.js`, sube `SEED_VERSION` para que los dispositivos los recarguen.
 
 ## Abrir en el iPhone (GitHub Pages)
 1. En GitHub: **Settings → Pages → Deploy from a branch → `main` / root**.
@@ -37,9 +37,9 @@ js/mock-api.js         Backend simulado (datos de ejemplo + rutas) en el navegad
 js/app.js              Lógica de pantallas
 js/store.js            Pantallas de la tienda
 js/icons.js            Iconos
-img/                   Logo, íconos de la app, imágenes de productos e historias (img/stories)
+img/                   Logo, íconos de la app, imágenes de productos, historias (img/stories) y publicaciones (img/feed)
 ```
 
-Las fotos de las historias (`img/stories/`) son de [StockSnap](https://stocksnap.io) con licencia **CC0** (dominio público: uso libre, también comercial, sin atribución obligatoria).
+Las fotos de las historias (`img/stories/`) y de las publicaciones (`img/feed/`) son de [StockSnap](https://stocksnap.io) con licencia **CC0** (dominio público: uso libre, también comercial, sin atribución obligatoria).
 
 Nota: las contraseñas se guardan con un hash simple en el dispositivo; es un prototipo, no hay seguridad real.
