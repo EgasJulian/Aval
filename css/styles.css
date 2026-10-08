@@ -424,6 +424,7 @@ a { color: var(--blue-600); text-decoration: none; }
 .story-view .frame .banner { align-items: flex-end; padding-bottom: 40px; }
 .story-view .frame .banner .emoji { top: 30%; right: 50%; transform: translate(50%, -50%); font-size: 120px; }
 .story-view p { color: #fff; width: min(560px, 100%); }
+.story-view .story-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 #toast { position: fixed; left: 50%; bottom: 100px; transform: translateX(-50%) translateY(20px); background: var(--blue-900); color: #fff; padding: 12px 20px; border-radius: 12px; font-weight: 600; opacity: 0; pointer-events: none; transition: all .25s; z-index: 100; max-width: calc(100% - 32px); text-align: center; }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }

@@ -31,6 +31,19 @@ const CATEGORIES = [
   { label: 'Empresas de construcción', sector: 'Construcción', emoji: '🏗️', bg: 'linear-gradient(160deg,#fde68a,#b45309)' },
   { label: 'Comercios y servicios', sector: 'Comercio y servicios', emoji: '🏬', bg: 'linear-gradient(160deg,#c7d2fe,#312e81)' },
 ];
+// Historias de las cuentas de ejemplo: fotos libres (CC0, StockSnap) en img/stories/
+const STORIES = {
+  andestech: { img: 'img/stories/andestech.jpg', text: 'Así arrancamos el día: nuevo sprint de desarrollo para la plataforma de pagos de nuestros clientes. 💻' },
+  agrosostenible: { img: 'img/stories/agrosostenible.jpg', text: 'Recorriendo los cultivos en Popayán. El campo también innova 🌾' },
+  mariafer_ruiz: { img: 'img/stories/mariafer_ruiz.jpg', text: 'Agenda abierta esta semana para asesorías en planeación estratégica. ¡Escríbeme!' },
+  construandes: { img: 'img/stories/construandes.jpg', text: 'Avance de obra: estructura del nuevo centro empresarial en Medellín al 70 %. 🏗️' },
+  ecosolar: { img: 'img/stories/ecosolar.jpg', text: 'Instalación terminada: 120 paneles para una bodega en Barranquilla. ☀️' },
+  logitrans: { img: 'img/stories/logitrans.jpg', text: 'Hoy en el puerto de Buenaventura despachando carga para exportación. 🚢' },
+  agrofuturo: { img: 'img/stories/agrofuturo.jpg', text: 'Temporada de cosecha: café 100 % seleccionado a mano en Risaralda. ☕' },
+  lauragomez: { img: 'img/stories/lauragomez.jpg', text: 'Taller de marketing con propósito para emprendedores. ¡Quedan pocos cupos!' },
+  induspacifico: { img: 'img/stories/induspacifico.jpg', text: 'Nuestra planta en Yumbo sigue creciendo: nueva línea de producción en marcha. 🏭' },
+};
+
 const THEMES = {
   tech: { label: 'Tecnología', emoji: '💡', bg: 'linear-gradient(120deg,#0b1a4a 10%,#1e3a8a 55%,#2563eb)' },
   agro: { label: 'Campo', emoji: '🌱', bg: 'linear-gradient(120deg,#0f2e1a 10%,#166534 55%,#65a30d)' },
@@ -454,9 +467,15 @@ async function viewFeed(params) {
   $('#clear')?.addEventListener('click', () => { f.q = ''; f.sector = ''; if (location.hash.includes('?')) location.hash = '#/inicio'; else viewFeed(); });
 
   // historias: la última publicación de cada cuenta
-  api('GET', '/posts').then(({ posts }) => {
+  Promise.all([api('GET', '/posts'), api('GET', '/companies')]).then(([{ posts }, { companies }]) => {
     const seen = new Map();
     posts.forEach((p) => { if (!seen.has(p.author.id)) seen.set(p.author.id, p); });
+    // cuentas con historia (foto) aunque aún no tengan publicaciones
+    companies.forEach((u, i) => {
+      if (seen.has(u.id) || !STORIES[u.handle]) return;
+      const p = { id: 'story-' + u.id, author: { id: u.id, handle: u.handle, name: u.company.name, logo: u.company.logo }, createdAt: new Date(Date.now() - (i + 2) * 3600e3).toISOString(), text: '', theme: 'tech' };
+      seen.set(u.id, p); posts.push(p);
+    });
     const me = state.me;
     $('#stories').innerHTML = `
       <button class="story" id="my-story"><div class="ring">${avatar(me.company, 68)}<span class="plus">${icon('plus', 14)}</span></div><span>Tu historia</span></button>
@@ -470,8 +489,9 @@ async function viewFeed(params) {
 function openStory(post) {
   const el = document.createElement('div');
   el.className = 'story-view';
+  const st = STORIES[post.author.handle];
   el.innerHTML = `<div class="bar"><i></i></div><div class="who">${avatar(post.author, 40)} ${esc(post.author.name)} <small style="opacity:.7;font-weight:400">· ${timeAgo(post.createdAt)}</small></div>
-    <div class="frame">${banner(post)}</div><p>${linkify(post.text || '')}</p>
+    <div class="frame">${st ? `<div class="post-media story-photo"><img src="${st.img}" alt=""></div>` : banner(post)}</div><p>${linkify(st ? st.text : post.text || '')}</p>
     <button class="btn btn-outline btn-sm" id="sv-go">Ver perfil ${icon('arrowRight', 16)}</button>`;
   document.body.appendChild(el);
   const close = () => { el.remove(); clearTimeout(t); };

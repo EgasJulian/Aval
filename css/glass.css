@@ -449,7 +449,7 @@ body::before {
 .redirect-card p { margin: 0; color: var(--muted); line-height: 1.5; max-width: 40ch; }
 .shopify-word { display: flex; align-items: center; gap: 10px; font-size: 32px; font-weight: 800; color: var(--ink); }
 .shopify-word .ic { color: var(--blue); }
-.ring { width: 64px; height: 64px; border-radius: 50%; border: 5px solid rgba(59, 130, 246, .18); border-top-color: var(--blue); animation: spin .9s linear infinite; }
+.redirect-card .ring { width: 64px; height: 64px; border-radius: 50%; border: 5px solid rgba(59, 130, 246, .18); border-top-color: var(--blue); animation: spin .9s linear infinite; }
 .redirect-card .secure-note { text-align: left; background: rgba(230, 240, 255, .6); padding: 12px; border-radius: 14px; margin: 0; }
 
 /* pedidos y administración */
@@ -536,7 +536,7 @@ body::before {
   .tab span { font-size: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ring, .spinner { animation-duration: 3s; }
+  .redirect-card .ring, .spinner { animation-duration: 3s; }
   .pcard:hover .pcard-img img { transform: none; }
 }
 .cart-side { min-width: 0; grid-template-columns: minmax(0, 1fr); }

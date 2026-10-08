@@ -37,7 +37,9 @@ js/mock-api.js         Backend simulado (datos de ejemplo + rutas) en el navegad
 js/app.js              Lógica de pantallas
 js/store.js            Pantallas de la tienda
 js/icons.js            Iconos
-img/                   Logo, íconos de la app e imágenes de productos
+img/                   Logo, íconos de la app, imágenes de productos e historias (img/stories)
 ```
+
+Las fotos de las historias (`img/stories/`) son de [StockSnap](https://stocksnap.io) con licencia **CC0** (dominio público: uso libre, también comercial, sin atribución obligatoria).
 
 Nota: las contraseñas se guardan con un hash simple en el dispositivo; es un prototipo, no hay seguridad real.
