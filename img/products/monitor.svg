@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><defs>
+<radialGradient id="shadow"><stop offset="0" stop-color="#0b1e5b" stop-opacity=".28"/><stop offset="1" stop-color="#0b1e5b" stop-opacity="0"/></radialGradient>
+<linearGradient id="silver" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f6fa"/><stop offset=".55" stop-color="#cfd5df"/><stop offset="1" stop-color="#9aa3b2"/></linearGradient>
+<linearGradient id="silverH" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b9c0cc"/><stop offset=".5" stop-color="#eef1f6"/><stop offset="1" stop-color="#aeb6c3"/></linearGradient>
+<linearGradient id="dark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3f4b"/><stop offset="1" stop-color="#14171d"/></linearGradient>
+<linearGradient id="black" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b2f38"/><stop offset="1" stop-color="#090a0d"/></linearGradient>
+<linearGradient id="gloss" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="wp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ec5ff"/><stop offset=".55" stop-color="#e7f1ff"/><stop offset="1" stop-color="#5a8fc7"/></linearGradient></defs>
+<ellipse cx="200" cy="272" rx="165" ry="14" fill="url(#shadow)"/><rect x="70" y="40" width="260" height="160" rx="8" fill="#15181e"/>
+    <clipPath id="scr"><rect x="78" y="48" width="244" height="140"/></clipPath><g clip-path="url(#scr)"><rect x="78" y="48" width="244" height="140" fill="url(#wp)"/>
+    <polygon points="78,148.8 131.68,101.2 175.60000000000002,132 219.51999999999998,87.2 278.08,134.8 322,111 322,148.8" fill="#3f6fa8"/>
+    <polygon points="204.88,98.4 219.51999999999998,87.2 234.16,99.8" fill="#fff"/>
+    <rect x="78" y="148.8" width="244" height="39.2" fill="#2f6aa5" opacity=".85"/></g>
+    <rect x="78" y="48" width="244" height="140" fill="url(#gloss)"/><rect x="70" y="192" width="260" height="10" rx="3" fill="#22262e"/>
+    <path d="M186 202 L214 202 L222 250 L178 250Z" fill="url(#dark)"/><ellipse cx="200" cy="254" rx="58" ry="9" fill="#22262e"/></svg>

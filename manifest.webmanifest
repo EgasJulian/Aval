@@ -1,0 +1,19 @@
+{
+  "name": "ColW · Red que transforma y conecta el mundo",
+  "short_name": "ColW",
+  "description": "Red empresarial de CODESAH: conecta empresas, publica novedades y genera oportunidades.",
+  "lang": "es",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1a47d6",
+  "theme_color": "#1d4ed8",
+  "categories": ["business", "social"],
+  "icons": [
+    { "src": "img/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "img/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

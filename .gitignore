@@ -1,0 +1,6 @@
+# Fuente original de ColW (incluye backend): no se sube al repo
+*.zip
+colw/
+node_modules/
+data/
+uploads/
